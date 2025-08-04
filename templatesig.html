@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیگنال‌ها</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: #764ba2;
+            transform: translateX(-5px);
+        }
+
+        .back-btn::before {
+            content: '←';
+            margin-left: 8px;
+            font-size: 1.2rem;
+        }
+
+        .signals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .signal-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .signal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .signal-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .signal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .signal-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-buy {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .status-sell {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #d63031;
+        }
+
+        .signal-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .no-signals {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-signals h2 {
+            font-size: 2rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .no-signals p {
+            font-size: 1.1rem;
+            color: #888;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .signals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .signal-card {
+                padding: 20px;
+            }
+            
+            .signal-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-btn">بازگشت به صفحه اصلی</a>
+            <h1>📊 سیگنال‌های معاملاتی</h1>
+            <p>آخرین سیگنال‌های تحلیلی بازار</p>
+            <button class="refresh-btn" onclick="refreshSignals()">🔄 بروزرسانی</button>
+        </div>
+
+        <div id="signalsContainer">
+            {% if signals %}
+            <div class="signals-grid">
+                {% for signal in signals %}
+                <div class="signal-card" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                    <div class="signal-header">
+                        <div class="signal-title">{{ signal.currency_name }}</div>
+                        <div class="signal-status {% if signal.direction == 'خرید' %}status-buy{% else %}status-sell{% endif %}">
+                            {{ signal.direction }}
+                        </div>
+                    </div>
+                    
+                    <div class="signal-details">
+                        <div class="detail-item">
+                            <div class="detail-label">نام ارز</div>
+                            <div class="detail-value">{{ signal.currency_name }}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">جهت معامله</div>
+                            <div class="detail-value">{{ signal.direction }}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">حد سود</div>
+                            <div class="detail-value">{{ signal.take_profit }}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">حد ضرر</div>
+                            <div class="detail-value">{{ signal.stop_loss }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-signals">
+                <h2>📭 هیچ سیگنالی موجود نیست</h2>
+                <p>در حال حاضر سیگنالی برای نمایش وجود ندارد</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // نمونه داده‌های سیگنال برای تست
+        const sampleSignals = [
+            {
+                currency_name: "BTC/USDT",
+                direction: "خرید",
+                take_profit: "45000",
+                stop_loss: "42000"
+            },
+            {
+                currency_name: "ETH/USDT", 
+                direction: "فروش",
+                take_profit: "3200",
+                stop_loss: "3500"
+            },
+            {
+                currency_name: "ADA/USDT",
+                direction: "خرید", 
+                take_profit: "0.85",
+                stop_loss: "0.75"
+            }
+        ];
+
+        function refreshSignals() {
+            const container = document.getElementById('signalsContainer');
+            const refreshBtn = document.querySelector('.refresh-btn');
+            
+            // نمایش حالت لودینگ
+            refreshBtn.innerHTML = '⏳ در حال بروزرسانی...';
+            refreshBtn.disabled = true;
+            
+            // شبیه‌سازی بارگذاری
+            setTimeout(() => {
+                // پاک کردن محتوای قبلی
+                container.innerHTML = '';
+                
+                if (sampleSignals.length > 0) {
+                    const grid = document.createElement('div');
+                    grid.className = 'signals-grid';
+                    
+                    sampleSignals.forEach((signal, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'signal-card';
+                        card.style.animationDelay = `${index * 0.1}s`;
+                        
+                        card.innerHTML = `
+                            <div class="signal-header">
+                                <div class="signal-title">${signal.currency_name}</div>
+                                <div class="signal-status ${signal.direction === 'خرید' ? 'status-buy' : 'status-sell'}">
+                                    ${signal.direction}
+                                </div>
+                            </div>
+                            
+                            <div class="signal-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">نام ارز</div>
+                                    <div class="detail-value">${signal.currency_name}</div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">جهت معامله</div>
+                                    <div class="detail-value">${signal.direction}</div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">حد سود</div>
+                                    <div class="detail-value">${signal.take_profit}</div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <div class="detail-label">حد ضرر</div>
+                                    <div class="detail-value">${signal.stop_loss}</div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    });
+                    
+                    container.appendChild(grid);
+                } else {
+                    container.innerHTML = `
+                        <div class="no-signals">
+                            <h2>📭 هیچ سیگنالی موجود نیست</h2>
+                            <p>در حال حاضر سیگنالی برای نمایش وجود ندارد</p>
+                        </div>
+                    `;
+                }
+                
+                // بازگردانی دکمه
+                refreshBtn.innerHTML = '🔄 بروزرسانی';
+                refreshBtn.disabled = false;
+            }, 1500);
+        }
+
+        // انیمیشن ورود کارت‌ها
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.signal-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // خواندن خودکار فایل سیگنال‌ها (شبیه‌سازی)
+        setInterval(() => {
+            // اینجا می‌توانید کد خواندن فایل از مخزن را قرار دهید
+            console.log('بررسی تغییرات فایل سیگنال‌ها...');
+        }, 30000); // هر 30 ثانیه
+    </script>
+</body>
+</html>
