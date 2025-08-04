@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سایت‌ها</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: #764ba2;
+            transform: translateX(-5px);
+        }
+
+        .back-btn::before {
+            content: '←';
+            margin-left: 8px;
+            font-size: 1.2rem;
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .site-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .site-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .site-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .site-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            position: relative;
+        }
+
+        .site-image::after {
+            content: '🌐';
+        }
+
+        .site-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .site-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .site-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .site-link:hover {
+            color: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .like-btn {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #d63031;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .like-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3);
+        }
+
+        .like-btn.liked {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .no-sites {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-sites h2 {
+            font-size: 2rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .no-sites p {
+            font-size: 1.1rem;
+            color: #888;
+        }
+
+        /* مودال نمایش جزئیات */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-description {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .visit-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .visit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .sites-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .site-card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-btn">بازگشت به صفحه اصلی</a>
+            <h1>🌐 سایت‌ها</h1>
+            <p>مجموعه‌ای از بهترین سایت‌ها</p>
+        </div>
+
+        <div id="sitesContainer">
+            {% if sites %}
+            <div class="sites-grid">
+                {% for site in sites %}
+                <div class="site-card" onclick="showSiteDetails({{ loop.index0 }})" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                    <div class="site-image"></div>
+                    <div class="site-title">{{ site.name }}</div>
+                    <div class="site-description">{{ site.description[:100] }}...</div>
+                    <div class="site-footer">
+                        <a href="{{ site.url }}" class="site-link" target="_blank" onclick="event.stopPropagation()">🔗 مشاهده سایت</a>
+                        <button class="like-btn" onclick="likeSite({{ site.id }}, this, event)">
+                            ❤️ <span>{{ site.likes or 0 }}</span>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-sites">
+                <h2>📭 هیچ سایتی موجود نیست</h2>
+                <p>در حال حاضر سایتی برای نمایش وجود ندارد</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- مودال نمایش جزئیات -->
+    <div id="siteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSiteModal()">&times;</span>
+            <div class="modal-title" id="modalTitle"></div>
+            <div class="modal-description" id="modalDescription"></div>
+            <div class="modal-actions">
+                <a id="modalLink" class="visit-btn" target="_blank">🚀 بازدید از سایت</a>
+                <button class="like-btn" id="modalLikeBtn">
+                    ❤️ <span id="modalLikes">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // نمونه داده‌های سایت برای تست
+        const sampleSites = [
+            {
+                id: 1,
+                name: "گوگل",
+                url: "https://www.google.com",
+                description: "موتور جستجوی محبوب گوگل که امکان جستجو در تمام وب را فراهم می‌کند. با امکانات پیشرفته و نتایج دقیق.",
+                likes: 1250
+            },
+            {
+                id: 2,
+                name: "یوتیوب",
+                url: "https://www.youtube.com", 
+                description: "بزرگترین پلتفرم اشتراک‌گذاری ویدیو در جهان. میلیون‌ها ویدیو در موضوعات مختلف آموزشی، سرگرمی و...",
+                likes: 980
+            },
+            {
+                id: 3,
+                name: "گیت‌هاب",
+                url: "https://www.github.com",
+                description: "پلتفرم توسعه نرم‌افزار و میزبانی کد. مکانی برای همکاری برنامه‌نویسان و مدیریت پروژه‌های متن‌باز.",
+                likes: 750
+            },
+            {
+                id: 4,
+                name: "استک اورفلو",
+                url: "https://stackoverflow.com",
+                description: "بزرگترین انجمن پرسش و پاسخ برنامه‌نویسی. محلی برای یافتن پاسخ مسائل تکنیکی و کمک به دیگران.",
+                likes: 650
+            }
+        ];
+
+        let currentSites = sampleSites;
+
+        function showSiteDetails(index) {
+            const site = currentSites[index];
+            if (!site) return;
+
+            document.getElementById('modalTitle').textContent = site.name;
+            document.getElementById('modalDescription').textContent = site.description;
+            document.getElementById('modalLink').href = site.url;
+            document.getElementById('modalLikes').textContent = site.likes || 0;
+            
+            document.getElementById('siteModal').style.display = 'block';
+        }
+
+        function closeSiteModal() {
+            document.getElementById('siteModal').style.display = 'none';
+        }
+
+        async function likeSite(siteId, button, event) {
+            event.stopPropagation();
+            
+            try {
+                // شبیه‌سازی درخواست لایک
+                const site = currentSites.find(s => s.id === siteId);
+                if (site) {
+                    site.likes = (site.likes || 0) + 1;
+                    
+                    // بروزرسانی نمایش
+                    const likesSpan = button.querySelector('span');
+                    likesSpan.textContent = site.likes;
+                    
+                    // افکت انیمیشن
+                    button.classList.add('liked');
+                    button.style.transform = 'scale(1.2)';
+                    
+                    setTimeout(() => {
+                        button.style.transform = 'scale(1)';
+                    }, 300);
+                }
+            } catch (error) {
+                console.error('خطا در لایک کردن:', error);
+            }
+        }
+
+        // بستن مودال با کلیک روی پس‌زمینه
+        window.onclick = function(event) {
+            const modal = document.getElementById('siteModal');
+            if (event.target === modal) {
+                closeSiteModal();
+            }
+        }
+
+        // انیمیشن ورود کارت‌ها
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.site-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        });
+
+        // شبیه‌سازی بارگذاری سایت‌ها در صورت خالی بودن
+        if (currentSites.length === 0) {
+            document.getElementById('sitesContainer').innerHTML = `
+                <div class="no-sites">
+                    <h2>📭 هیچ سایتی موجود نیست</h2>
+                    <p>در حال حاضر سایتی برای نمایش وجود ندارد</p>
+                </div>
+            `;
+        } else {
+            // نمایش سایت‌های نمونه
+            let sitesHTML = '<div class="sites-grid">';
+            currentSites.forEach((site, index) => {
+                sitesHTML += `
+                    <div class="site-card" onclick="showSiteDetails(${index})" style="animation-delay: ${index * 0.1}s">
+                        <div class="site-image"></div>
+                        <div class="site-title">${site.name}</div>
+                        <div class="site-description">${site.description.substring(0, 100)}...</div>
+                        <div class="site-footer">
+                            <a href="${site.url}" class="site-link" target="_blank" onclick="event.stopPropagation()">🔗 مشاهده سایت</a>
+                            <button class="like-btn" onclick="likeSite(${site.id}, this, event)">
+                                ❤️ <span>${site.likes || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            sitesHTML += '</div>';
+            document.getElementById('sitesContainer').innerHTML = sitesHTML;
+        }
+    </script>
+</body>
+</html>
