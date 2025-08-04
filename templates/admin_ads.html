@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت تبلیغات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #fbb6ce;
+            margin-bottom: 10px;
+        }
+
+        .header .warning {
+            background: rgba(255, 165, 0, 0.2);
+            color: #fbb6ce;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .tab:not(.active) {
+            color: #a0aec0;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: #e2e8f0;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e0;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #d63031;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .ad-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ad-card:hover {
+            border-color: #4facfe;
+            transform: translateY(-5px);
+        }
+
+        .ad-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 10px;
+        }
+
+        .ad-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .status-inactive {
+            background: rgba(255, 255, 255, 0.2);
+            color: #a0aec0;
+        }
+
+        .ad-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-right: 4px solid #4facfe;
+        }
+
+        .ad-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .ad-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>📢 مدیریت تبلیغات</h1>
+            <div class="warning">⚠️ پنل کنترل تبلیغات - دسترسی محدود</div>
+        </div>
+
+        <!-- تب‌ها -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('create')">➕ ایجاد تبلیغ</div>
+            <div class="tab" onclick="switchTab('manage')">📋 مدیریت تبلیغات</div>
+            <div class="tab" onclick="switchTab('stats')">📊 آمار تبلیغات</div>
+        </div>
+
+        <!-- تب ایجاد تبلیغ -->
+        <div id="createTab" class="tab-content active">
+            <div class="form-section">
+                <h2>ایجاد تبلیغ جدید</h2>
+                
+                <div class="form-group">
+                    <label for="adTitle">عنوان تبلیغ:</label>
+                    <input type="text" id="adTitle" placeholder="عنوان جذاب تبلیغ را وارد کنید">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adContent">محتوای تبلیغ:</label>
+                    <textarea id="adContent" placeholder="متن تبلیغ را وارد کنید..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adLink">لینک تبلیغ:</label>
+                        <input type="url" id="adLink" placeholder="https://example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adPosition">موقعیت نمایش:</label>
+                        <select id="adPosition">
+                            <option value="header">بالای صفحه</option>
+                            <option value="sidebar">کناره صفحه</option>
+                            <option value="footer">پایین صفحه</option>
+                            <option value="popup">پاپ‌آپ</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adStartDate">تاریخ شروع:</label>
+                        <input type="datetime-local" id="adStartDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adEndDate">تاریخ پایان:</label>
+                        <input type="datetime-local" id="adEndDate">
+                    </div>
+                </div>
+                
+                <div class="ad-preview" id="adPreview" style="display: none;">
+                    <h4>پیش‌نمایش تبلیغ:</h4>
+                    <div id="previewContent"></div>
+                </div>
+                
+                <button class="btn btn-success" onclick="previewAd()">👁️ پیش‌نمایش</button>
+                <button class="btn btn-primary" onclick="createAd()">📢 ایجاد تبلیغ</button>
+            </div>
+        </div>
+
+        <!-- تب مدیریت تبلیغات -->
+        <div id="manageTab" class="tab-content">
+            <div class="form-section">
+                <h2>مدیریت تبلیغات موجود</h2>
+                
+                <div class="ads-grid" id="adsGrid">
+                    <!-- تبلیغات اینجا نمایش داده می‌شوند -->
+                </div>
+            </div>
+        </div>
+
+        <!-- تب آمار -->
+        <div id="statsTab" class="tab-content">
+            <div class="form-section">
+                <h2>آمار و گزارشات</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">24</div>
+                        <div class="stat-label">تبلیغات فعال</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-number">1,256</div>
+                        <div class="stat-label">کل نمایش</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-number">89</div>
+                        <div class="stat-label">کلیک</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-number">7.1%</div>
+                        <div class="stat-label">نرخ کلیک</div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 30px; margin-top: 20px;">
+                    <h3 style="color: #e2e8f0; margin-bottom: 20px;">عملکرد تبلیغات</h3>
+                    <p style="color: #a0aec0; line-height: 1.8;">
+                        آمار تبلیغات نشان می‌دهد که تبلیغات شما عملکرد مناسبی دارند. 
+                        نرخ کلیک بالاتر از میانگین صنعت است و تعداد نمایش‌ها در حال افزایش می‌باشد.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // نمونه داده‌های تبلیغات
+        let ads = [
+            {
+                id: 1,
+                title: "تبلیغ ویژه محصول A",
+                content: "بهترین محصول بازار با تخفیف ویژه",
+                link: "https://example.com/product-a",
+                position: "header",
+                status: "active",
+                clicks: 45,
+                views: 523
+            },
+            {
+                id: 2,
+                title: "خدمات مشاوره",
+                content: "مشاوره رایگان برای کسب و کار شما",
+                link: "https://example.com/consulting",
+                position: "sidebar",
+                status: "inactive",
+                clicks: 12,
+                views: 156
+            }
+        ];
+
+        function switchTab(tabName) {
+            // پنهان کردن همه تب‌ها
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // پنهان کردن همه دکمه‌های تب
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // نمایش تب انتخاب شده
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // بارگذاری محتوای تب در صورت نیاز
+            if (tabName === 'manage') {
+                loadAds();
+            }
+        }
+
+        function previewAd() {
+            const title = document.getElementById('adTitle').value;
+            const content = document.getElementById('adContent').value;
+            const link = document.getElementById('adLink').value;
+            
+            if (!title && !content) {
+                alert('لطفاً حداقل عنوان یا محتوا را وارد کنید');
+                return;
+            }
+            
+            const preview = document.getElementById('adPreview');
+            const previewContent = document.getElementById('previewContent');
+            
+            previewContent.innerHTML = `
+                <div style="border: 2px solid #4facfe; border-radius: 10px; padding: 15px; background: rgba(79, 172, 254, 0.1);">
+                    <h4 style="color: #4facfe; margin-bottom: 10px;">${title || 'بدون عنوان'}</h4>
+                    <p style="color: #e2e8f0; margin-bottom: 10px;">${content || 'بدون محتوا'}</p>
+                    ${link ? `<a href="${link}" style="color: #4facfe;">🔗 مشاهده بیشتر</a>` : ''}
+                </div>
+            `;
+            
+            preview.style.display = 'block';
+        }
+
+        function createAd() {
+            const title = document.getElementById('adTitle').value.trim();
+            const content = document.getElementById('adContent').value.trim();
+            const link = document.getElementById('adLink').value.trim();
+            const position = document.getElementById('adPosition').value;
+            const startDate = document.getElementById('adStartDate').value;
+            const endDate = document.getElementById('adEndDate').value;
+            
+            if (!title || !content) {
+                alert('لطفاً عنوان و محتوای تبلیغ را وارد کنید');
+                return;
+            }
+            
+            const newAd = {
+                id: ads.length + 1,
+                title: title,
+                content: content,
+                link: link,
+                position: position,
+                status: 'active',
+                startDate: startDate,
+                endDate: endDate,
+                clicks: 0,
+                views: 0
+            };
+            
+            ads.push(newAd);
+            
+            alert('✅ تبلیغ جدید با موفقیت ایجاد شد!');
+            
+            // پاک کردن فرم
+            document.getElementById('adTitle').value = '';
+            document.getElementById('adContent').value = '';
+            document.getElementById('adLink').value = '';
+            document.getElementById('adPreview').style.display = 'none';
+            
+            console.log('تبلیغ جدید:', newAd);
+        }
+
+        function loadAds() {
+            const adsGrid = document.getElementById('adsGrid');
+            
+            if (ads.length === 0) {
+                adsGrid.innerHTML = '<p style="text-align: center; color: #a0aec0;">هیچ تبلیغی موجود نیست</p>';
+                return;
+            }
+            
+            let adsHTML = '';
+            
+            ads.forEach(ad => {
+                adsHTML += `
+                    <div class="ad-card">
+                        <div class="ad-title">${ad.title}</div>
+                        <div class="ad-status ${ad.status === 'active' ? 'status-active' : 'status-inactive'}">
+                            ${ad.status === 'active' ? '🟢 فعال' : '🔴 غیرفعال'}
+                        </div>
+                        
+                        <div class="ad-preview">
+                            <p>${ad.content}</p>
+                            ${ad.link ? `<a href="${ad.link}" style="color: #4facfe;">🔗 ${ad.link}</a>` : ''}
+                        </div>
+                        
+                        <div style="color: #a0aec0; font-size: 0.9rem; margin: 10px 0;">
+                            📊 ${ad.views} نمایش • 👆 ${ad.clicks} کلیک • 📍 ${ad.position}
+                        </div>
+                        
+                        <div class="ad-actions">
+                            <button class="btn btn-warning" onclick="toggleAdStatus(${ad.id})">
+                                ${ad.status === 'active' ? '⏸️ توقف' : '▶️ فعال'}
+                            </button>
+                            <button class="btn btn-primary" onclick="editAd(${ad.id})">✏️ ویرایش</button>
+                            <button class="btn btn-danger" onclick="deleteAd(${ad.id})">🗑️ حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            adsGrid.innerHTML = adsHTML;
+        }
+
+        function toggleAdStatus(adId) {
+            const ad = ads.find(a => a.id === adId);
+            if (ad) {
+                ad.status = ad.status === 'active' ? 'inactive' : 'active';
+                loadAds();
+                alert(`✅ وضعیت تبلیغ "${ad.title}" تغییر کرد`);
+            }
+        }
+
+        function editAd(adId) {
+            const ad = ads.find(a => a.id === adId);
+            if (ad) {
+                // پر کردن فرم با اطلاعات تبلیغ
+                document.getElementById('adTitle').value = ad.title;
+                document.getElementById('adContent').value = ad.content;
+                document.getElementById('adLink').value = ad.link || '';
+                document.getElementById('adPosition').value = ad.position;
+                
+                // رفتن به تب ایجاد
+                switchTab('create');
+                document.querySelector('.tab').click();
+                
+                alert('اطلاعات تبلیغ در فرم بارگذاری شد');
+            }
+        }
+
+        function deleteAd(adId) {
+            const ad = ads.find(a => a.id === adId);
+            if (ad && confirm(`آیا از حذف تبلیغ "${ad.title}" اطمینان دارید؟`)) {
+                ads = ads.filter(a => a.id !== adId);
+                loadAds();
+                alert('✅ تبلیغ حذف شد');
+            }
+        }
+
+        // بارگذاری اولیه
+        window.addEventListener('load', function() {
+            loadAds();
+        });
+
+        // افکت‌های انیمیشن
+        document.querySelectorAll('input, textarea, select').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.borderColor = '#4facfe';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+                this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            });
+        });
+    </script>
+</body>
+</html>
