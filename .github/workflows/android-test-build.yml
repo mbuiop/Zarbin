@@ -1,0 +1,273 @@
+name: Android CI - Test and Build
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Android Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Run unit tests
+      run: |
+        ./gradlew testDebugUnitTest
+        ./gradlew testReleaseUnitTest
+        
+    - name: Run instrumentation tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 29
+        script: ./gradlew connectedDebugAndroidTest
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: |
+          **/build/reports/
+          **/build/outputs/androidTest-results/
+        retention-days: 7
+
+  build:
+    name: Build Android APK and AAB
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Build Debug APK
+      run: |
+        ./gradlew assembleDebug
+        ./gradlew bundleDebug
+        
+    - name: Build Release APK (Signed)
+      env:
+        KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+        KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
+      run: |
+        if [ -n "$KEYSTORE_FILE" ]; then
+          echo "Building signed release version..."
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
+        else
+          echo "Skipping signed release build - no keystore secrets"
+          ./gradlew assembleReleaseNoSign
+        fi
+        
+    - name: Upload APK artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: android-apks
+        path: |
+          **/build/outputs/apk/
+          **/build/outputs/bundle/
+        retention-days: 30
+        
+    - name: Upload to GitHub Releases (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          **/build/outputs/apk/**/*.apk
+          **/build/outputs/bundle/**/*.aab
+          
+    - name: Generate Build Report
+      run: |
+        echo "📱 Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "================" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Build Status**: Successful" >> $GITHUB_STEP_SUMMARY
+        echo "📦 **Artifacts**: APK & AAB files generated" >> $GITHUB_STEP_SUMMARY
+        echo "🕒 **Timestamp**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Generated Files:" >> $GITHUB_STEP_SUMMARY
+        find **/build/outputs -name "*.apk" -o -name "*.aab" | while read file; do
+          echo "- \`$file\`" >> $GITHUB_STEP_SUMMARY
+        done
+
+  quality-check:
+    name: Code Quality & Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      
+    - name: Run Android Lint
+      run: |
+        ./gradlew lintDebug
+        ./gradlew lintRelease
+        
+    - name: Run Kotlin Static Analysis
+      run: |
+        ./gradlew detekt
+        ./gradlew ktlintCheck
+        
+    - name: Generate Lint Report
+      run: |
+        ./gradlew lintReport
+        
+    - name: Upload Quality Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: quality-reports
+        path: |
+          **/build/reports/lint/
+          **/build/reports/detekt/
+          **/build/reports/ktlint/
+        retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Run Dependency Vulnerability Check
+      run: |
+        ./gradlew dependencyCheckAnalyze
+        
+    - name: Upload Security Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          **/build/reports/dependency-check/
+        retention-days: 7
+
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      
+    - name: Run Performance Profiling
+      run: |
+        ./gradlew benchmarkMode
+        ./gradlew profileRelease
+      
+    - name: Upload Performance Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-reports
+        path: |
+          **/build/reports/benchmark/
+          **/build/reports/profile/
+        retention-days: 7
+
+  notify:
+    name: Notification
+    needs: [test, build, quality-check, security-scan]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify Slack on Failure
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        channel: '#android-builds'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        
+    - name: Notify on Success
+      if: success()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        channel: '#android-builds'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
